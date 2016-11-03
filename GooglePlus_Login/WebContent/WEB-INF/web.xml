@@ -5,7 +5,7 @@
 	<display-name>Google Plus Login</display-name>
 	<servlet>
 		<servlet-name>GoogleLoginServlet</servlet-name>
-		<servlet-class>com.garage.social.GoogleLoginServlet</servlet-class>
+		<servlet-class>com.demo.social.GoogleLoginServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
