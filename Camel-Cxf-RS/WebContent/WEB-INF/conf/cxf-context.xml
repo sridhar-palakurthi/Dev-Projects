@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+		<import resource="classpath:META-INF/cxf/cxf.xml"/>
+    	<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
+    	<import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+	
+		<bean id="userRouterBean" class="router.UserRouter" />
+		
+		<cxf:rsServer id="userAtServer" address="/userService" loggingFeatureEnabled="true">
+			<cxf:serviceBeans>
+				<ref bean="userRouterBean" />
+			</cxf:serviceBeans>
+			<cxf:providers>
+				<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			</cxf:providers>
+		</cxf:rsServer>
+
+		<camelContext id="context" xmlns="http://camel.apache.org/schema/spring">
+			<route>
+				<from uri="cxfrs:bean:userAtServer" />
+				<choice>
+					<when>
+						<simple>${header.operationName} == 'saveUser'</simple>
+						<to uri="direct:invokeSaveUser" />
+					</when>
+					<when>
+						<simple>${header.operationName} == 'updateUser'</simple>
+						<to uri="direct:invokeUpdateUser" />
+					</when>
+					<when>
+						<simple>${header.operationName} == 'deleteUser'</simple>
+						<to uri="direct:invokeDeleteUser" />
+					</when>
+					<when>
+						<simple>${header.operationName} == 'getUser'</simple>
+						<to uri="direct:invokeGetUser" />
+					</when>
+					<when>
+						<simple>${header.operationName} == 'findAllUsers'</simple>
+						<to uri="direct:invokeFindAllUsers" />
+					</when>
+				</choice>
+			</route>
+		
+			<route id="invokeSaveUser">
+				<from uri="direct:invokeSaveUser" />
+				<bean ref="userRouterBean" method="saveUser" />
+			</route>
+			<route id="invokeUpdateUser">
+				<from uri="direct:invokeUpdateUser" />
+				<bean ref="userRouterBean" method="updateUser" />
+			</route>
+			<route id="invokeDeleteUser">
+				<from uri="direct:invokeDeleteUser" />
+				<bean ref="userRouterBean" method="deleteUser" />
+			</route>
+			<route id="invokeGetUser">
+				<from uri="direct:invokeGetUser" />
+				<bean ref="userRouterBean" method="getUser" />
+			</route>
+			<route id="invokeFindAllUsers">
+				<from uri="direct:invokeFindAllUsers" />
+				<bean ref="userRouterBean" method="findAllUsers" />
+			</route>
+		</camelContext>
+
+</beans>
